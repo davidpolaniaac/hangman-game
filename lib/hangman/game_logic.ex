@@ -3,18 +3,20 @@ defmodule Hangman.GameLogic do
   Logic Hangman game
   """
 
+  alias Hangman.State
+
   @doc """
   Main logic game
   """
-  def guess(letter, state) do
-    %{word: word, matches: matches, misses: misses, limit: limit} = state
+  def guess(letter, %State{} = state) do
+    %{goal: goal, matches: matches, misses: misses, limit: limit} = state
 
-    if String.contains?(word, letter) do
-      matches = [letter | matches]
-      completed? = word |> String.codepoints() |> Enum.all?(&(&1 in matches))
+    if MapSet.member?(goal, letter) do
+      matches = MapSet.put(matches, letter)
+      completed? = MapSet.equal?(goal, matches)
       %{state | matches: matches, completed?: completed?}
     else
-      %{state | misses: [letter | misses], limit: limit - 1}
+      %{state | misses: MapSet.put(misses, letter), limit: limit - 1}
     end
   end
 end
