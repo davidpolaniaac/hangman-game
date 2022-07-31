@@ -1,26 +1,26 @@
 defmodule Hangman.View do
   @moduledoc """
-  View Hangman game
+  Presentation layer for the Hangman game
   """
 
   alias Hangman.State
 
   @doc """
-  format response state
+  Returns a human-friendly response
   """
   def format_response(%State{limit: limit, completed?: false} = state) when limit > 0 do
-    {mask_word(state), state}
+    mask_word(state) <> ". Limit: #{limit}."
   end
 
-  def format_response(%State{limit: limit, word: word} = state) when limit > 0 do
-    {"You won, word was: #{word}", state}
+  def format_response(%State{limit: limit, word: word} = _state) when limit > 0 do
+    "You won, word was: #{word}"
   end
 
-  def format_response(%State{word: word} = state) do
-    {"Game Over, word was: #{word}", state}
+  def format_response(%State{word: word} = _state) do
+    "Game Over, word was: #{word}"
   end
 
-  defp mask_word(%State{matches: matches, mask: mask, word: word}) do
+  defp mask_word(%{matches: matches, word: word, mask: mask} = _state) do
     if MapSet.size(matches) > 0 do
       matches = Enum.join(matches)
       String.replace(word, ~r/[^#{matches}]/, mask)

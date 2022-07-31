@@ -1,5 +1,6 @@
 defmodule Hangman.State do
   @enforce_keys [:word, :goal]
+
   defstruct [
     :word,
     :goal,

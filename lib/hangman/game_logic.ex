@@ -1,12 +1,12 @@
 defmodule Hangman.GameLogic do
   @moduledoc """
-  Logic Hangman game
+  Main logic for the game
   """
 
   alias Hangman.State
 
   @doc """
-  Main logic game
+  Returns the game state after the user takes a guess
   """
   def guess(letter, %State{} = state) do
     %{goal: goal, matches: matches, misses: misses, limit: limit} = state

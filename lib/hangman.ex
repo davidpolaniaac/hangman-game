@@ -2,39 +2,45 @@ defmodule Hangman do
   @moduledoc """
   The famous Hangman game
   """
+  use Agent
 
   alias Hangman.GameLogic
-  alias Hangman.View
   alias Hangman.State
+  alias Hangman.View
   alias Hangman.Goal
 
   @doc """
   Starts the game
   """
-  def start_game do
-    Goal.generate()
-    |> State.new()
-    |> View.format_response()
+  def start_link(name) when is_atom(name) do
+    Agent.start_link(
+      fn ->
+        Goal.generate() |> State.new()
+      end,
+      name: name
+    )
   end
 
   @doc """
   Lets the user to take a guess
-
   ## Examples
-
-      iex> {_word, state} = Hangman.start_game()
-      iex> Hangman.take_a_guess("a", state) |> elem(0)
-      "_a___a_"
-
+      iex> {:ok, pid} = Hangman.start_link(:player)
+      iex> Hangman.take_a_guess(pid, "a")
+      "_a___a_. Limit: 5."
   """
-  def take_a_guess(letter, %State{limit: limit, completed?: false} = state) when limit > 0 do
-    letter
-    |> String.downcase()
-    |> GameLogic.guess(state)
-    |> View.format_response()
+  def take_a_guess(player, letter) do
+    new_state =
+      Agent.get_and_update(player, fn state ->
+        new_state =
+          letter
+          |> String.downcase()
+          |> GameLogic.guess(state)
+
+        {new_state, new_state}
+      end)
+
+    View.format_response(new_state)
   end
 
-  def take_a_guess(_letter, state), do: View.format_response(state)
-
-  ## Helpers
+  def stop(player) when is_atom(player), do: Agent.stop(player)
 end
